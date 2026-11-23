@@ -2,6 +2,7 @@ import type {
   BudgetResult,
   Category,
   Expense,
+  ExpenseFilter,
   NewExpense,
   Summary,
 } from "./types.js";
@@ -34,23 +35,38 @@ export function addExpense(
   return [...expenses, expense];
 }
 
+/** Strategy factory: keep expenses in the given category. */
+export const byCategory =
+  (category: Category): ExpenseFilter =>
+  (e) => e.category === category;
+
+/** Strategy factory: inclusive date range; either bound may be omitted. */
+export const byDateRange =
+  (from?: string, to?: string): ExpenseFilter =>
+  // ISO dates sort correctly as plain strings.
+  (e) => (from === undefined || e.date >= from) && (to === undefined || e.date <= to);
+
+/** Single pass: keep expenses matching every filter. No filters returns a copy. */
+export function filterExpenses(
+  expenses: readonly Expense[],
+  ...filters: ExpenseFilter[]
+): Expense[] {
+  return expenses.filter((e) => filters.every((f) => f(e)));
+}
+
 export function filterByCategory(
   expenses: readonly Expense[],
   category: Category,
 ): Expense[] {
-  return expenses.filter((e) => e.category === category);
+  return filterExpenses(expenses, byCategory(category));
 }
 
-/** Inclusive date range filter. Either bound may be omitted. */
 export function filterByDateRange(
   expenses: readonly Expense[],
   from?: string,
   to?: string,
 ): Expense[] {
-  // ISO dates sort correctly as plain strings.
-  return expenses.filter(
-    (e) => (from === undefined || e.date >= from) && (to === undefined || e.date <= to),
-  );
+  return filterExpenses(expenses, byDateRange(from, to));
 }
 
 export function calculateTotal(expenses: readonly Expense[]): number {

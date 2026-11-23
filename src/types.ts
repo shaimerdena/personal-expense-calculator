@@ -19,6 +19,9 @@ export interface Expense {
 /** Input needed to create an expense (the id is generated). */
 export type NewExpense = Omit<Expense, "id">;
 
+/** A filter strategy: returns true when an expense should be kept. */
+export type ExpenseFilter = (expense: Expense) => boolean;
+
 /** Aggregate view of a list of expenses. */
 export interface Summary {
   readonly count: number;

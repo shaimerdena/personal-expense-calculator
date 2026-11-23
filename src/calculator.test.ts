@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   addExpense,
   applyBudget,
+  byCategory,
+  byDateRange,
   calculateTotal,
   filterByCategory,
   filterByDateRange,
+  filterExpenses,
   summarize,
 } from "./calculator.js";
 import type { Expense } from "./types.js";
@@ -51,6 +54,20 @@ describe("filters", () => {
     expect(filterByDateRange(seed(), "2025-01-16")).toHaveLength(1);
     expect(filterByDateRange(seed(), undefined, "2025-01-10")).toHaveLength(1);
     expect(filterByDateRange(seed())).toHaveLength(3);
+  });
+});
+
+describe("filterExpenses", () => {
+  it("composes byCategory and byDateRange in a single pass", () => {
+    const result = filterExpenses(seed(), byCategory("food"), byDateRange("2025-01-01", "2025-01-31"));
+    expect(result.map((e) => e.description)).toEqual(["Lunch"]);
+  });
+
+  it("returns a new, equal list when no filters are given", () => {
+    const list = seed();
+    const result = filterExpenses(list);
+    expect(result).toEqual(list);
+    expect(result).not.toBe(list);
   });
 });
 
