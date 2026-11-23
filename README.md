@@ -17,6 +17,9 @@ npm start           # build, then run the demo (node dist/index.js)
 | Function | Purpose |
 | --- | --- |
 | `addExpense(list, input)` | Returns a new list with the expense added; validates amount and `YYYY-MM-DD` date |
+| `filterExpenses(list, ...filters)` | Single-pass filter applying all provided `ExpenseFilter` strategies |
+| `byCategory(category)` | Strategy factory matching expenses in one category |
+| `byDateRange(from?, to?)` | Strategy factory matching an inclusive `YYYY-MM-DD` date range |
 | `filterByCategory(list, category)` | Expenses in one category |
 | `filterByDateRange(list, from?, to?)` | Inclusive date range; either bound optional |
 | `calculateTotal(list)` | Sum, rounded to 2 decimals |
