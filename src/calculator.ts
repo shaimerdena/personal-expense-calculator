@@ -16,6 +16,14 @@ function isValidDate(value: string): boolean {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(value);
 }
 
+function nextExpenseId(expenses: readonly Expense[]): string {
+  const maxId = expenses.reduce((max, e) => {
+    const match = /^exp-(\d+)$/.exec(e.id);
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 0);
+  return `exp-${maxId + 1}`;
+}
+
 /** Return a new list with the expense appended. Throws on invalid input. */
 export function addExpense(
   expenses: readonly Expense[],
@@ -30,7 +38,7 @@ export function addExpense(
   const expense: Expense = {
     ...input,
     amount: round2(input.amount),
-    id: `exp-${expenses.length + 1}`,
+    id: nextExpenseId(expenses),
   };
   return [...expenses, expense];
 }
@@ -42,9 +50,19 @@ export const byCategory =
 
 /** Strategy factory: inclusive date range; either bound may be omitted. */
 export const byDateRange =
-  (from?: string, to?: string): ExpenseFilter =>
-  // ISO dates sort correctly as plain strings.
-  (e) => (from === undefined || e.date >= from) && (to === undefined || e.date <= to);
+  (from?: string, to?: string): ExpenseFilter => {
+    if (from !== undefined && !isValidDate(from)) {
+      throw new RangeError(`Invalid 'from' date (expected YYYY-MM-DD): ${from}`);
+    }
+    if (to !== undefined && !isValidDate(to)) {
+      throw new RangeError(`Invalid 'to' date (expected YYYY-MM-DD): ${to}`);
+    }
+    if (from !== undefined && to !== undefined && from > to) {
+      throw new RangeError(`Invalid date range: 'from' (${from}) is after 'to' (${to})`);
+    }
+    // ISO dates sort correctly as plain strings.
+    return (e) => (from === undefined || e.date >= from) && (to === undefined || e.date <= to);
+  };
 
 /** Single pass: keep expenses matching every filter. No filters returns a copy. */
 export function filterExpenses(

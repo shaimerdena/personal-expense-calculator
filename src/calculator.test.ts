@@ -29,6 +29,12 @@ describe("addExpense", () => {
     expect(updated[0]?.id).toBe("exp-1");
   });
 
+  it("generates unique monotonic IDs when adding to a filtered list (RSK-02)", () => {
+    const foodOnly = filterByCategory(seed(), "food"); // contains exp-1 and exp-3
+    const updated = addExpense(foodOnly, { description: "Snack", amount: 5, category: "food", date: "2025-02-05" });
+    expect(updated.map((e) => e.id)).toEqual(["exp-1", "exp-3", "exp-4"]);
+  });
+
   it("rejects non-positive or non-finite amounts", () => {
     const bad = { description: "x", category: "other", date: "2025-01-01" } as const;
     expect(() => addExpense([], { ...bad, amount: 0 })).toThrow(RangeError);
@@ -54,6 +60,13 @@ describe("filters", () => {
     expect(filterByDateRange(seed(), "2025-01-16")).toHaveLength(1);
     expect(filterByDateRange(seed(), undefined, "2025-01-10")).toHaveLength(1);
     expect(filterByDateRange(seed())).toHaveLength(3);
+  });
+
+  it("rejects malformed or inverted date range bounds (RSK-01)", () => {
+    const list = seed();
+    expect(() => filterByDateRange(list, "2025-1-5")).toThrow(RangeError);
+    expect(() => filterByDateRange(list, undefined, "2025-02-30")).toThrow(RangeError);
+    expect(() => filterByDateRange(list, "2025-02-01", "2025-01-01")).toThrow(RangeError);
   });
 });
 
