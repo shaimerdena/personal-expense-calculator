@@ -1,0 +1,18 @@
+{
+  "name": "expense-calculator",
+  "version": "1.0.0",
+  "description": "Personal expense calculator: pure TypeScript functions, zero runtime dependencies",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "npm run build && node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}
